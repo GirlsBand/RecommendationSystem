@@ -1,7 +1,8 @@
-﻿using Facebook;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
 using System.Net;
+using Microsoft.AspNetCore;
+using Microsoft.AspNetCore.Hosting;
 
 namespace RecommendationSystem
 {
@@ -24,7 +25,7 @@ namespace RecommendationSystem
             var tempo = client.DownloadString(oauthUrl).ToString();
             string accessToken = JsonConvert.DeserializeObject<AccesTokenInfo>(tempo).Access_Token;
 
-            var fbClient = new FacebookClient(accessToken);
+            /*var fbClient = new FacebookClient(accessToken);
            
             try
             {
@@ -34,8 +35,14 @@ namespace RecommendationSystem
             catch (FacebookOAuthException ex)
             {
                 Console.Write(ex.Message);
-            }
-            Console.ReadLine();
+            }*/
+
+            WebHost.CreateDefaultBuilder(args)
+                .UseStartup<Startup>()
+                .Build()
+                .Run();
+
+            Console.ReadKey();
         }
     }
 }
