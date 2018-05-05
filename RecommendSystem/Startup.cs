@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Authentication.Cookies;
+
 
 namespace RecommendationSystem
 {
@@ -10,9 +11,7 @@ namespace RecommendationSystem
     {
         const string AppId = "193302211282683";
         const string AppSecret = "2fb8063b7eded7b8a0f63b68c108dc7f";
-        const string Domain = "https://recommendation-system.auth0.com/";
-        const string Audience = "https://recommendation-system.auth0.com/api/v2/";
-
+        
         public IConfiguration Configuration { get; }
 
         public Startup(IHostingEnvironment env)
@@ -26,6 +25,7 @@ namespace RecommendationSystem
         public void Configure(IApplicationBuilder app)
         {
             app.UseMvcWithDefaultRoute();
+
             app.UseAuthentication();
         }
 
@@ -35,14 +35,18 @@ namespace RecommendationSystem
 
             services.AddAuthentication(options =>
             {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            })
+            .AddFacebook(facebookOptions => {
+                facebookOptions.AppId = AppId;
+                facebookOptions.AppSecret = AppSecret;
+                facebookOptions.Scope.Add("public_profile");
+                facebookOptions.Fields.Add("name");
+            })
+            .AddCookie();
 
-            }).AddJwtBearer(options =>
-            {
-                options.Authority = Domain;
-                options.Audience = Audience;
-            });
         }
     }
 }
