@@ -33,6 +33,8 @@ namespace RecommendationSystem
         {
             services.AddMvc();
 
+            services.AddSingleton<IFacebookService>(new FacebookService(new FacebookClient()));
+
             services.AddAuthentication(options =>
             {
                 options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
