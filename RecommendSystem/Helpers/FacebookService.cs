@@ -22,9 +22,9 @@ namespace RecommendationSystem
 
     public class FacebookService : IFacebookService
     {
-        private readonly IFacebookClient _facebookClient;
+        private readonly ISocialNetHttpClient _facebookClient;
 
-        public FacebookService(IFacebookClient facebookClient)
+        public FacebookService(ISocialNetHttpClient facebookClient)
         {
             _facebookClient = facebookClient;
         }

@@ -7,30 +7,32 @@ using System.Threading.Tasks;
 
 namespace RecommendationSystem
 {
-    public interface IFacebookClient
+    public interface ISocialNetHttpClient
     {
         Task<T> GetAsync<T>(string accessToken, string endpoint, string args = null);
         Task PostAsync(string accessToken, string endpoint, object data, string args = null);
     }
 
-    public class FacebookClient : IFacebookClient
+    public class SocialNetHttpClient : ISocialNetHttpClient
     {
-        private readonly HttpClient _httpClient;
+        readonly HttpClient HttpClient;
 
-        public FacebookClient()
+        readonly string Endpoint;
+        public SocialNetHttpClient(string url)
         {
-            _httpClient = new HttpClient
+            Endpoint = url;
+            HttpClient = new HttpClient
             {
-                BaseAddress = new Uri("https://graph.facebook.com/v2.12/")
+                BaseAddress = new Uri(url)
             };
-            _httpClient.DefaultRequestHeaders
+            HttpClient.DefaultRequestHeaders
                 .Accept
                 .Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
         public async Task<T> GetAsync<T>(string accessToken, string endpoint, string args = null)
         {
-            var response = await _httpClient.GetAsync($"{endpoint}?access_token={accessToken}&{args}");
+            var response = await HttpClient.GetAsync($"{Endpoint}?access_token={accessToken}&{args}");
             if (!response.IsSuccessStatusCode)
                 return default(T);
 
@@ -42,7 +44,7 @@ namespace RecommendationSystem
         public async Task PostAsync(string accessToken, string endpoint, object data, string args = null)
         {
             var payload = GetPayload(data);
-            await _httpClient.PostAsync($"{endpoint}?access_token={accessToken}&{args}", payload);
+            await HttpClient.PostAsync($"{Endpoint}?access_token={accessToken}&{args}", payload);
         }
 
         private static StringContent GetPayload(object data)

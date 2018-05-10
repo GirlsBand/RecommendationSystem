@@ -33,7 +33,7 @@ namespace RecommendationSystem
         {
             services.AddMvc();
 
-            services.AddSingleton<IFacebookService>(new FacebookService(new FacebookClient()));
+            services.AddSingleton<IFacebookService>(new FacebookService(new SocialNetHttpClient("https://graph.facebook.com/v2.12/")));
 
             services.AddAuthentication(options =>
             {
