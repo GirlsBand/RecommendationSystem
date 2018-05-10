@@ -2,7 +2,7 @@
 
 namespace RecommendationSystem.Models
 {
-    public class AccesTokenInfo
+    public class AccessTokenInfo
     {
         [JsonProperty("Access_Token")]
         public string AccessToken { get; set; }

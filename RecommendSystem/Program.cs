@@ -10,10 +10,9 @@ namespace RecommendationSystem
         {
             WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
+                .UseUrls("http://localhost:3001")
                 .Build()
                 .Run();
-
-            Console.ReadKey();
         }
     }
 }
