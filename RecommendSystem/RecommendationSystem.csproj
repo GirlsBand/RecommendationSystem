@@ -15,4 +15,37 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="2.0.2" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Update="frontBuild\asset-manifest.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+	    <None Update="frontBuild\favicon.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+	    <None Update="frontBuild\index.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+	    <None Update="frontBuild\manifest.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+	    <None Update="frontBuild\service-worker.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+	    <None Update="frontBuild\static\css\main.c17080f1.css">
+	      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	    </None>
+	    <None Update="frontBuild\static\css\main.c17080f1.css.map">
+	      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	    </None>
+	    <None Update="frontBuild\static\js\main.b2a6edab.js">
+	      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	    </None>
+	    <None Update="frontBuild\static\js\main.b2a6edab.js.map">
+	      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	    </None>
+	    <None Update="frontBuild\static\media\logo.5d5d9eef.svg">
+	      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	    </None>
+  </ItemGroup>
 </Project>
