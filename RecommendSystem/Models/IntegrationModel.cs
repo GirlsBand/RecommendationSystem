@@ -5,10 +5,10 @@ namespace RecommendationSystem.Models
 {
     public class IntegrationModel
     {
-        public string Country = "USA";
-        public string City;
-        public Coordinates Coordinates;
-        public bool InCity;
+        public string Country { get; set; }= "USA";
+        public string City { get; set; }
+        public Coordinates Coordinates { get; set; }
+        public bool InCity { get; set; }
 
         public IntegrationModel CreateIntegrationModel(Account account)
         {
@@ -31,8 +31,8 @@ namespace RecommendationSystem.Models
 
     public class Coordinate {
 
-        public float Latitude;
-        public float Longitude;
+        public float Latitude { get; set; }
+        public float Longitude { get; set; }
 
         public Coordinate(float latitude, float longitude) {
             Latitude = latitude;
@@ -42,9 +42,9 @@ namespace RecommendationSystem.Models
 
     public class Coordinates
     {
-        public Coordinate Work = null;
-        public Coordinate Study = null;
-        public List<Coordinate> CheckIns;
+        public Coordinate Work { get; set; }
+        public Coordinate Study { get; set; }
+        public List<Coordinate> CheckIns { get; set; }
 
         public Coordinates(Coordinate work, Coordinate study, List<Coordinate> checkIns)
         {
@@ -68,11 +68,6 @@ namespace RecommendationSystem.Models
             CheckIns.Remove(checkIn);
         }
 
-    }
-
-    public enum PreferenceType
-    {
-        if_city,
-        if_near_subway
+    
     }
 }

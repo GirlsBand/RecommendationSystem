@@ -15,10 +15,10 @@ namespace RecommendationSystem.Controllers
         public void Answers([FromBody]string json) {
             var surveyResuslt = JsonConvert.DeserializeObject<Survey>(json);
 
-            var inCityQuestion = surveyResuslt.FindQuestion(Survey.InCityPreferenceQuestion);
+            //var inCityQuestion = surveyResuslt.FindQuestion(Survey.InCityPreferenceQuestion);
             var inCity = false;
 
-            if (inCityQuestion.Answers[0] == "City")
+           // if (inCityQuestion.Answers[0] == "City")
                 inCity = true;
         }
     }
