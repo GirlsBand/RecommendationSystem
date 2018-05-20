@@ -5,30 +5,32 @@ namespace RecommendationSystem.Models
 {
     public class Survey
     {
-        static List<Question> Questions;    
+        public const string InCityPreferenceQuestion = "What do you prefer?";
+
+        public List<Question> Questions { get; set; }    
         public Survey(List<Question> questions)
         {
             Questions = questions;
         }
 
-        public static void AddQuestion(Question question)
+        public void AddQuestion(Question question)
         {
             Questions.Add(question);
         }
 
-        public static Question FindQuestion(Question question) => FindQuestion(question.Title);
+        public Question FindQuestion(Question question) => FindQuestion(question.Title);
         
 
-        public static Question FindQuestion(string title) => Questions.Find(question => question.Title == title);
+        public Question FindQuestion(string title) => Questions.Find(question => question.Title == title);
     
-        public static void ReplaceQuestion(Question question)
+        public void ReplaceQuestion(Question question)
         {
             Questions.Remove(FindQuestion(question));
 
             AddQuestion(question);
         }
 
-        public static void AddAnswer(string title, string answer)
+        public void AddAnswer(string title, string answer)
         {
             var questionToUpdate = FindQuestion(title);
 
@@ -46,10 +48,9 @@ namespace RecommendationSystem.Models
         {
             get
             {
-                var firstQuestion = new Question("What do you prefer?", new List<string> { "City", "CountrySide" });
-                var secondQuestion = new Question("Do you want to live near a subway station?", new List<string> { "Yes", "No" });
+                var firstQuestion = new Question(InCityPreferenceQuestion, new List<string> { "City", "CountrySide" });
 
-                return new Survey(new List<Question> { firstQuestion, secondQuestion });
+                return new Survey(new List<Question> { firstQuestion });
             }
         }
     }

@@ -32,9 +32,9 @@ namespace RecommendationSystem
 
         public async Task<T> GetAsync<T>(string accessToken, string endpoint, string args = null)
         {
-            var response = await HttpClient.GetAsync($"{Endpoint}?access_token={accessToken}&{args}");
+            var response = await HttpClient.GetAsync($"{Endpoint}/{endpoint}?access_token={accessToken}&{args}");
             if (!response.IsSuccessStatusCode)
-                return default(T);
+                throw new HttpResponseException(response.StatusCode);
 
             var result = await response.Content.ReadAsStringAsync();
 

@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace RecommendationSystem
 {
@@ -6,12 +7,28 @@ namespace RecommendationSystem
     {
         public string Id { get; set; }
         public string Name { get; set; }
-        public string Email { get; set; }
-        public string Locale { get; set; }
-        public string UserName { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string Gender { get; set; }
+        public LocationInfo[] Tagged_Places { get; set; }
+        public LocationInfo Location { get; set; }
+    }
+
+    public class LocationInfo
+    {
+        public long Id { get; set; }
+        public DateTime Created_time { get; set; }
+        public string Name { get; set; }
+        public Place Place { get; set; }
+    }
+    public class Place
+    {
+        public long Id { get; set; }
+        public Location Location { get; set; }
+    }
+
+    public class Location {
+        public string City { get; set; }
+        public string Country { get; set; }
+        public float Latitude { get; set; }
+        public float Longitude { get; set; }
     }
 
     public interface IFacebookService
@@ -32,7 +49,7 @@ namespace RecommendationSystem
         public async Task<Account> GetAccountAsync(string accessToken)
         {
             var result = await _facebookClient.GetAsync<dynamic>(
-                accessToken, "me", "fields=id,name,email,first_name,last_name,age_range,birthday,gender,locale");
+                accessToken, "me", "fields=id,name,tagged_places.limit(50),location");
 
             if (result == null)
             {
@@ -42,12 +59,9 @@ namespace RecommendationSystem
             var account = new Account
             {
                 Id = result.id,
-                Email = result.email,
                 Name = result.name,
-                UserName = result.username,
-                FirstName = result.first_name,
-                LastName = result.last_name,
-                Locale = result.locale
+                Tagged_Places = result.tagged_places.data.ToObject<LocationInfo[]>(),
+                Location = result.location.ToObject<LocationInfo>()
             };
 
             return account;

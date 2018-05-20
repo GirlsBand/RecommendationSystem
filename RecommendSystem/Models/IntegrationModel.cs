@@ -1,13 +1,32 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace RecommendationSystem.Models
 {
     public class IntegrationModel
     {
-        public string Country;
+        public string Country = "USA";
         public string City;
         public Coordinates Coordinates;
-        public Dictionary<PreferenceType, bool> Preferences;
+        public bool InCity;
+
+        public IntegrationModel CreateIntegrationModel(Account account)
+        {
+            var integrationModel = new IntegrationModel
+            {
+                City = account.Location.Name
+            };
+
+            var checkIns = new List<Coordinate>();
+
+            foreach (var location in account.Tagged_Places)
+                if (!(location.Created_time < DateTime.Today.AddYears(-1)))
+                    checkIns.Add(new Coordinate(location.Place.Location.Latitude, location.Place.Location.Longitude));
+
+            integrationModel.Coordinates = new Coordinates(checkIns);
+
+            return integrationModel;
+        }
     }
 
     public class Coordinate {
@@ -23,8 +42,8 @@ namespace RecommendationSystem.Models
 
     public class Coordinates
     {
-        public Coordinate Work;
-        public Coordinate Study;
+        public Coordinate Work = null;
+        public Coordinate Study = null;
         public List<Coordinate> CheckIns;
 
         public Coordinates(Coordinate work, Coordinate study, List<Coordinate> checkIns)
@@ -34,14 +53,9 @@ namespace RecommendationSystem.Models
             CheckIns = checkIns;
         }
 
-        public void UpdateWork(Coordinate work)
+        public Coordinates(List<Coordinate> checkIns)
         {
-            Work = work;
-        }
-
-        public void UpdateStudy(Coordinate study)
-        {
-            Study = study;
+            CheckIns = checkIns;
         }
 
         public void AddCheckIn(Coordinate checkIn)

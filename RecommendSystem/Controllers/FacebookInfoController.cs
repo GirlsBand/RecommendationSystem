@@ -14,15 +14,14 @@ namespace RecommendationSystem.Controllers
             _service = service ?? throw new ArgumentNullException(nameof(service));
         }
 
-        [HttpGet]
-        public string GetUserName([FromBody]string clientAccessToken)
+        [HttpPost]
+        public string Login(string clientAccessToken)
         {
             var getAccountTask = _service.GetAccountAsync(clientAccessToken);
-
             Task.WaitAll(getAccountTask);
             var account = getAccountTask.Result;
+
             return account.Name;
         }
-
     }
 }
