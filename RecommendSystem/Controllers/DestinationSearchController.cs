@@ -24,7 +24,7 @@ namespace RecommendationSystem.Controllers
 
         [Route("api/destination")]
         [HttpPost]
-        public async Task<string> GetDetination([FromBody]string json)
+        public async Task<ResponseModel> GetDetination([FromBody]string json)
         {
             if (!Request.Headers.ContainsKey("ClientAccessToken"))
                 throw new HttpResponseException(HttpStatusCode.Forbidden);
@@ -41,7 +41,8 @@ namespace RecommendationSystem.Controllers
             var client = new HttpClient();
             var response = await client.PostAsync(requestUri, new StringContent(JsonConvert.SerializeObject(integrationModel)));
 
-            return "It's default destination [0,0]";
+            var responseModel = JsonConvert.DeserializeObject<ResponseModel>(await response.Content.ReadAsStringAsync());
+            return responseModel;
         }
 
         private IntegrationModel FormIntegrationModel(Account account)
