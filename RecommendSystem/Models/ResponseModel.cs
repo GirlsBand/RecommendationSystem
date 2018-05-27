@@ -8,10 +8,58 @@ namespace RecommendationSystem.Models
         public float Center_lat { get; set; }
         public float Center_lot { get; set; }
         public DistanceProfits Profits { get; set; }
-        public Apartment[] Apartment { get; set; }
+        public Appartment[] Apartments { get; set; }
+
+       
 
     }
 
+    public static class ResponseModelExtension
+    {
+        public static ApartmentsResult ToApartmentsResult(this ResponseModel model)
+        {
+            const int numberOfApartments = 50;
+
+            var appartmentInfoResult = new List<AppartmentInfo>();
+
+            foreach (var appartment in model.Apartments)
+            {
+                appartmentInfoResult.Add(new AppartmentInfo
+                {
+                    Lat = appartment.Lat,
+                    Long = appartment.Long,
+                    Address = appartment.Address,
+                    Area = appartment.Area,
+                    Price = appartment.Price,
+                    DistanceToCenter = appartment.Distance_to_center
+                });
+            }
+
+            appartmentInfoResult.Sort(delegate (AppartmentInfo x, AppartmentInfo y)
+            {
+                return Convert.ToInt32(x.Price > y.Price);
+            });
+
+            if (appartmentInfoResult.Count > numberOfApartments)
+                appartmentInfoResult.RemoveRange(numberOfApartments, appartmentInfoResult.Count - numberOfApartments);
+
+            var radius = appartmentInfoResult[0].DistanceToCenter;
+            foreach (var appartment in appartmentInfoResult)
+            {
+                if (radius < appartment.DistanceToCenter)
+                    radius = appartment.DistanceToCenter;
+            }
+
+            return new ApartmentsResult
+            {
+                Center_lat = model.Center_lat,
+                Center_lot = model.Center_lot,
+                Radius = radius,
+                Apartments = appartmentInfoResult
+            };
+
+        }
+    }
     public class DistanceProfits
     {
         public float Work_distance { get; set; }
@@ -20,7 +68,7 @@ namespace RecommendationSystem.Models
         public float Shcool_time { get; set; }
     }
 
-    public class Apartment
+    public class Appartment
     {
         public float Lat { get; set; }
         public float Long { get; set; }

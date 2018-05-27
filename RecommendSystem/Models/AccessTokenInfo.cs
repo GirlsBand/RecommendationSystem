@@ -10,4 +10,5 @@ namespace RecommendationSystem.Models
         [JsonProperty("Token_Type")]
         public string TokenType { get; set; }
     }
+
 }

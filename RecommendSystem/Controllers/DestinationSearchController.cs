@@ -12,6 +12,9 @@ namespace RecommendationSystem.Controllers
 {
     public class DestinationSearchController : ControllerBase
     {
+        //TODO AZ: Delete after adding actual dictionary
+        public Dictionary<string, ResponseModel> ResponseDictionary;
+
         const string requestUri = "";
 
         readonly IFacebookService _service;
@@ -24,14 +27,9 @@ namespace RecommendationSystem.Controllers
 
         [Route("api/destination")]
         [HttpPost]
-        public async Task<ResponseModel> GetDetination([FromBody]string json)
+        public async Task<ApartmentsResult> GetDestination([FromBody]string json)
         {
-            if (!Request.Headers.ContainsKey("ClientAccessToken"))
-                throw new HttpResponseException(HttpStatusCode.Forbidden);
-
-            Request.Headers.TryGetValue("ClientAccessToken", out StringValues clientAccessTokens);
-
-            var clientAccessToken = clientAccessTokens[0].ToString();
+            string clientAccessToken = RetrieveAccessToken();
             var account = await _service.GetAccountAsync(clientAccessToken);
 
             surveyResult = JsonConvert.DeserializeObject<Survey>(json);
@@ -42,10 +40,81 @@ namespace RecommendationSystem.Controllers
             var response = await client.PostAsync(requestUri, new StringContent(JsonConvert.SerializeObject(integrationModel)));
 
             var responseModel = JsonConvert.DeserializeObject<ResponseModel>(await response.Content.ReadAsStringAsync());
-            return responseModel;
+
+            return responseModel.ToApartmentsResult();
         }
 
-        private IntegrationModel FormIntegrationModel(Account account)
+        [HttpGet]
+        [Route("api/prices")]
+        public dynamic GetPrices()
+        {
+            var resultForUser = GetResultModelByAccessToken();
+
+            var lowestPrice = resultForUser.Apartments[0].Price;
+            var highestPrice = resultForUser.Apartments[0].Price;
+
+            foreach (var appartment in resultForUser.Apartments)
+            {
+                var currPrice = appartment.Price;
+
+                if (currPrice < lowestPrice)
+                    lowestPrice = currPrice;
+                if (currPrice > highestPrice)
+                    highestPrice = currPrice;
+            }
+
+            return new
+            {
+                LowestPrice = lowestPrice,
+                HighestPrice = highestPrice
+            };
+        }
+
+        [HttpGet]
+        [Route("api/apartments")]
+        public ApartmentsResult FilterApartments([FromBody] float highestPrice)
+        {
+            var resultForUser = GetResultModelByAccessToken();
+
+            var filteredResult = new List<Appartment>();
+
+            foreach (var appartment in resultForUser.Apartments)
+            {
+                if (appartment.Price <= highestPrice)
+                {
+                    filteredResult.Add(appartment);
+                }
+            }
+
+            resultForUser.Apartments = filteredResult.ToArray();
+
+            return resultForUser.ToApartmentsResult();
+        }
+
+        ResponseModel GetResultModelByAccessToken()
+        {
+            var accessToken = RetrieveAccessToken();
+
+            if (!ResponseDictionary.TryGetValue(accessToken, out ResponseModel resultForUser))
+                throw new HttpResponseException(HttpStatusCode.NotFound);
+
+            if (resultForUser.Apartments == null || resultForUser.Apartments.Length == 0)
+                throw new HttpResponseException(HttpStatusCode.NotFound);
+
+            return resultForUser;
+        }
+
+        string RetrieveAccessToken()
+        {
+            if (!Request.Headers.ContainsKey("ClientAccessToken"))
+                throw new HttpResponseException(HttpStatusCode.Forbidden);
+
+            Request.Headers.TryGetValue("ClientAccessToken", out StringValues clientAccessTokens);
+
+            return clientAccessTokens[0].ToString();
+        }
+
+        IntegrationModel FormIntegrationModel(Account account)
         {
             var integrationModel = CreateIntegrationModel(account);
 
@@ -88,5 +157,7 @@ namespace RecommendationSystem.Controllers
 
             return question.Answers[0];
         }
+
+
     }
 }
