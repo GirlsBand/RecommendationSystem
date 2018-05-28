@@ -18,14 +18,14 @@ namespace RecommendationSystem.Models
             Questions = new[]
                 {
                     new Question(WhatDoYouPreferQuestion,
-                        new List<string> {"City", "CountrySide"}),
-                    new Question(HowManyPeopleAreInYourFamilyQuestion , null),
-                    new Question(SpecifyPlaceOfWorkQuestion, null),
-                    new Question(SpecifyPlaceOfStudyQuestion, null),
+                        new List<string> {"City", "CountrySide"}, "checkbox"),
+                    new Question(HowManyPeopleAreInYourFamilyQuestion , null, "input"),
+                    new Question(SpecifyPlaceOfWorkQuestion, null, "input"),
+                    new Question(SpecifyPlaceOfStudyQuestion, null, "input"),
                     new Question(ClarifyCityToLiveQuestion, 
-                        new List<string> {"San-Diego", "San-Francisko"}),
+                        new List<string> {"San-Diego", "San-Francisko"}, "select"),
                      new Question(DoYouHavePetsToWalkQuestion,
-                        new List<string> {"Yes", "No"}),
+                        new List<string> {"Yes", "No"}, "select"),
                 }
         };
     }

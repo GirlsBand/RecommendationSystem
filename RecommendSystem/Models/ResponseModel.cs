@@ -37,24 +37,22 @@ namespace RecommendationSystem.Models
 
             appartmentInfoResult.Sort(delegate (AppartmentInfo x, AppartmentInfo y)
             {
-                return Convert.ToInt32(x.Price > y.Price);
+                return Convert.ToInt32(x.Price < y.Price);
             });
 
             if (appartmentInfoResult.Count > numberOfApartments)
                 appartmentInfoResult.RemoveRange(numberOfApartments, appartmentInfoResult.Count - numberOfApartments);
 
-            var radius = appartmentInfoResult[0].DistanceToCenter;
-            foreach (var appartment in appartmentInfoResult)
+            appartmentInfoResult.Sort(delegate (AppartmentInfo x, AppartmentInfo y)
             {
-                if (radius < appartment.DistanceToCenter)
-                    radius = appartment.DistanceToCenter;
-            }
+                return Convert.ToInt32(x.DistanceToCenter < y.DistanceToCenter);
+            });
 
             return new ApartmentsResult
             {
                 Center_lat = model.Center_lat,
                 Center_lot = model.Center_lot,
-                Radius = radius,
+                Radius = appartmentInfoResult[appartmentInfoResult.Count - 1].DistanceToCenter,
                 Apartments = appartmentInfoResult
             };
 

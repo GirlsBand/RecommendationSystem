@@ -7,11 +7,12 @@ namespace RecommendationSystem.Models
         public string Title { get; set; }
         public List<string> Answers { get; set; }
 
-
-        public Question(string title, List<string> answers)
+        public string Type { get; set; }
+        public Question(string title, List<string> answers, string type)
         {
             Title = title;
             Answers = answers;
+            Type = type;
         }
     }
 }
