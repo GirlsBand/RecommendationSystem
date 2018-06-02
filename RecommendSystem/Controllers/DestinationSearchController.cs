@@ -3,9 +3,11 @@ using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json;
 using RecommendationSystem.Models;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace RecommendationSystem.Controllers
@@ -17,12 +19,14 @@ namespace RecommendationSystem.Controllers
 
         const string requestUri = "";
 
-        readonly IFacebookService _service;
-        Survey surveyResult;
-       
-        public DestinationSearchController(IFacebookService service)
+        private readonly IFacebookService _service;
+        private readonly DestinationProvider _provider;
+        private Survey surveyResult; //TODO:  needs refactoring!
+
+        public DestinationSearchController(IFacebookService service, DestinationProvider provider)
         {
             _service = service ?? throw new ArgumentNullException(nameof(service));
+            _provider = provider ?? throw new ArgumentNullException(nameof(provider));
         }
 
         [Route("api/destination")]
@@ -36,12 +40,9 @@ namespace RecommendationSystem.Controllers
 
             var integrationModel = FormIntegrationModel(account);
 
-            var client = new HttpClient();
-            var response = await client.PostAsync(requestUri, new StringContent(JsonConvert.SerializeObject(integrationModel)));
+            var result = await _provider.GetOrAdd(clientAccessToken, integrationModel);
 
-            var responseModel = JsonConvert.DeserializeObject<ResponseModel>(await response.Content.ReadAsStringAsync());
-
-            return responseModel.ToApartmentsResult();
+            return result.ToApartmentsResult();
         }
 
         [HttpGet]
@@ -159,5 +160,38 @@ namespace RecommendationSystem.Controllers
         }
 
 
+    }
+
+    public class DestinationProvider
+    {
+        private readonly HttpClient _client;
+        private readonly ConcurrentDictionary<string, ResponseModel>
+            _cache = new ConcurrentDictionary<string, ResponseModel>();
+
+        private readonly string _uri;
+
+        public DestinationProvider(HttpClient client, string uri)
+        {
+            if (string.IsNullOrWhiteSpace(uri))
+                throw new ArgumentNullException(nameof(uri));
+
+            _client = client ?? throw new ArgumentNullException(nameof(client));
+            _uri = uri;
+        }
+
+        public async Task<ResponseModel> GetOrAdd(string token, IntegrationModel model)
+        {
+            if (_cache.TryGetValue(token, out var value))
+                return value;
+
+            var content = new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json");
+            var response = await _client.PostAsync(_uri, content);
+                response.EnsureSuccessStatusCode();
+            var responseContent = await response.Content.ReadAsStringAsync();
+
+            var destinations = JsonConvert.DeserializeObject<ResponseModel>(responseContent);
+            _cache.AddOrUpdate(token, destinations, (k, v) => destinations);
+            return destinations;
+        }
     }
 }
