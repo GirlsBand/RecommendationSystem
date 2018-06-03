@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using RecommendationSystem.Controllers;
 
 
 namespace RecommendationSystem
@@ -34,7 +35,7 @@ namespace RecommendationSystem
             services.AddMvc();
 
             services.AddSingleton<IFacebookService>(new FacebookService(new SocialNetHttpClient("https://graph.facebook.com/v2.12/")));
-
+            services.AddSingleton<DestinationProvider>();
             services.AddAuthentication(options =>
             {
                 options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;

@@ -44,9 +44,9 @@ namespace RecommendationSystem.Controllers
 
         [HttpGet]
         [Route("api/prices")]
-        public dynamic GetPrices()
+        public async Task<dynamic> GetPrices()
         {
-            var resultForUser = GetResultModelByAccessToken();
+            var resultForUser = await _provider.GetOrAdd(RetrieveAccessToken(), null);
 
             var lowestPrice = resultForUser.Apartments[0].Price;
             var highestPrice = resultForUser.Apartments[0].Price;
@@ -70,9 +70,9 @@ namespace RecommendationSystem.Controllers
 
         [HttpGet]
         [Route("api/apartments")]
-        public ApartmentsResult FilterApartments([FromBody] float highestPrice)
+        public async Task<ApartmentsResult> FilterApartments([FromBody] float highestPrice)
         {
-            var resultForUser = GetResultModelByAccessToken();
+            var resultForUser = await _provider.GetOrAdd(RetrieveAccessToken(), null);
 
             var filteredResult = new List<Appartment>();
 
@@ -89,22 +89,8 @@ namespace RecommendationSystem.Controllers
             return resultForUser.ToApartmentsResult();
         }
 
-        ResponseModel GetResultModelByAccessToken()
-        {
-            var accessToken = RetrieveAccessToken();
 
-            //TODO check cache disctionary implementation
 
-            //if (!ResponseDictionary.TryGetValue(accessToken, out ResponseModel resultForUser))
-            //   throw new HttpResponseException(HttpStatusCode.NotFound);
-
-            var resultForUser = new ResponseModel();
-
-            if (resultForUser.Apartments == null || resultForUser.Apartments.Length == 0)
-                throw new HttpResponseException(HttpStatusCode.NotFound);
-
-            return resultForUser;
-        }
 
         string RetrieveAccessToken()
         {
