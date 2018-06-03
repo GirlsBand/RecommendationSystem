@@ -14,14 +14,11 @@ namespace RecommendationSystem.Controllers
 {
     public class DestinationSearchController : ControllerBase
     {
-        //TODO AZ: Delete after adding actual dictionary
-        public Dictionary<string, ResponseModel> ResponseDictionary;
-
         const string requestUri = "";
 
         private readonly IFacebookService _service;
         private readonly DestinationProvider _provider;
-        private Survey surveyResult; //TODO:  needs refactoring!
+        
 
         public DestinationSearchController(IFacebookService service, DestinationProvider provider)
         {
@@ -36,9 +33,9 @@ namespace RecommendationSystem.Controllers
             string clientAccessToken = RetrieveAccessToken();
             var account = await _service.GetAccountAsync(clientAccessToken);
 
-            surveyResult = JsonConvert.DeserializeObject<Survey>(json);
+            var surveyResult = JsonConvert.DeserializeObject<Survey>(json);
 
-            var integrationModel = FormIntegrationModel(account);
+            var integrationModel = FormIntegrationModel(account, surveyResult);
 
             var result = await _provider.GetOrAdd(clientAccessToken, integrationModel);
 
@@ -96,8 +93,12 @@ namespace RecommendationSystem.Controllers
         {
             var accessToken = RetrieveAccessToken();
 
-            if (!ResponseDictionary.TryGetValue(accessToken, out ResponseModel resultForUser))
-                throw new HttpResponseException(HttpStatusCode.NotFound);
+            //TODO check cache disctionary implementation
+
+            //if (!ResponseDictionary.TryGetValue(accessToken, out ResponseModel resultForUser))
+            //   throw new HttpResponseException(HttpStatusCode.NotFound);
+
+            var resultForUser = new ResponseModel();
 
             if (resultForUser.Apartments == null || resultForUser.Apartments.Length == 0)
                 throw new HttpResponseException(HttpStatusCode.NotFound);
@@ -115,16 +116,16 @@ namespace RecommendationSystem.Controllers
             return clientAccessTokens[0].ToString();
         }
 
-        IntegrationModel FormIntegrationModel(Account account)
+        IntegrationModel FormIntegrationModel(Account account, Survey surveyResult)
         {
             var integrationModel = CreateIntegrationModel(account);
 
-            integrationModel.InCity = FindAnswerByTitle(Survey.WhatDoYouPreferQuestion) == "City";
-            integrationModel.AmountOfPeopleLiving = Int32.Parse(FindAnswerByTitle(Survey.HowManyPeopleAreInYourFamilyQuestion));
-            integrationModel.City = FindAnswerByTitle(Survey.ClarifyCityToLiveQuestion);
-            integrationModel.Work = FindAnswerByTitle(Survey.SpecifyPlaceOfWorkQuestion);
-            integrationModel.Study = FindAnswerByTitle(Survey.SpecifyPlaceOfStudyQuestion);
-            integrationModel.PetsToWalkPresence = FindAnswerByTitle(Survey.DoYouHavePetsToWalkQuestion) == "Yes";
+            integrationModel.InCity = FindAnswerByTitle(surveyResult, Survey.Region) == "City";
+            integrationModel.AmountOfPeopleLiving = Int32.Parse(FindAnswerByTitle(surveyResult, Survey.People));
+            integrationModel.City = FindAnswerByTitle(surveyResult, Survey.City);
+            integrationModel.Work = FindAnswerByTitle(surveyResult, Survey.Work);
+            integrationModel.Study = FindAnswerByTitle(surveyResult, Survey.Study);
+            integrationModel.PetsToWalkPresence = FindAnswerByTitle(surveyResult, Survey.Pets).Equals("Yes", StringComparison.InvariantCultureIgnoreCase);
 
             return integrationModel;
         }
@@ -136,7 +137,7 @@ namespace RecommendationSystem.Controllers
             var checkIns = new List<Coordinate>();
 
             foreach (var location in account.Tagged_Places)
-                if (!(location.Created_time < DateTime.Today.AddYears(-1)))
+                if (location.Created_time > DateTime.Today.AddYears(-1))
                     checkIns.Add(new Coordinate(location.Place.Location.Latitude, location.Place.Location.Longitude));
 
             integrationModel.Coordinates = checkIns;
@@ -144,19 +145,20 @@ namespace RecommendationSystem.Controllers
             return integrationModel;
         }
 
-        string FindAnswerByTitle(string title)
+        string FindAnswerByTitle(Survey surveyResult, string name)
         {
             Question question = null;
+
             foreach (var item in surveyResult.Questions)
             {
-                if (title == item.Title)
+                if (item.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase))
                     question = item;
             }
 
             if (question == null)
                 throw new ArgumentException();
 
-            return question.Answers[0];
+            return question.Answer;
         }
 
 

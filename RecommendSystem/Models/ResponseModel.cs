@@ -9,9 +9,6 @@ namespace RecommendationSystem.Models
         public float Center_lot { get; set; }
         public DistanceProfits Profits { get; set; }
         public Appartment[] Apartments { get; set; }
-
-       
-
     }
 
     public static class ResponseModelExtension

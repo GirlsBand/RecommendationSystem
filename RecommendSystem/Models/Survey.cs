@@ -4,29 +4,25 @@ namespace RecommendationSystem.Models
 {
     public class Survey
     {
-        public const string WhatDoYouPreferQuestion = "What do you prefer?";
-        public const string HowManyPeopleAreInYourFamilyQuestion = "How many people are in your family?";
-        public const string SpecifyPlaceOfWorkQuestion = "Specify place of work";
-        public const string SpecifyPlaceOfStudyQuestion = "Specify place of study";
-        public const string ClarifyCityToLiveQuestion = "Clarify the city to live";
-        public const string DoYouHavePetsToWalkQuestion = "Do you have pets to walk?";
+        public const string Region = "region";
+        public const string People = "people";
+        public const string Work = "work";
+        public const string Study = "study";
+        public const string City = "city";
+        public const string Pets = "pets";
 
         public Question[] Questions { get; set; }
+    }
 
-        public static Survey Default => new Survey
+    public class Question
+    {
+        public string Name { get; set; }
+        public string Answer { get; set; }
+
+        public Question(string name, string answer)
         {
-            Questions = new[]
-                {
-                    new Question(WhatDoYouPreferQuestion,
-                        new List<string> {"City", "CountrySide"}, "checkbox"),
-                    new Question(HowManyPeopleAreInYourFamilyQuestion , null, "input"),
-                    new Question(SpecifyPlaceOfWorkQuestion, null, "input"),
-                    new Question(SpecifyPlaceOfStudyQuestion, null, "input"),
-                    new Question(ClarifyCityToLiveQuestion, 
-                        new List<string> {"San-Diego", "San-Francisko"}, "select"),
-                     new Question(DoYouHavePetsToWalkQuestion,
-                        new List<string> {"Yes", "No"}, "select"),
-                }
-        };
+            Name = name;
+            Answer = answer;
+        }
     }
 }
