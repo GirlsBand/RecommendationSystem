@@ -6,7 +6,7 @@ namespace RecommendationSystem.Models
     public class ResponseModel
     {
         public float Center_lat { get; set; }
-        public float Center_lot { get; set; }
+        public float Center_long { get; set; }
         public DistanceProfits Profits { get; set; }
         public Appartment[] Apartments { get; set; }
     }
@@ -48,7 +48,7 @@ namespace RecommendationSystem.Models
             return new ApartmentsResult
             {
                 Center_lat = model.Center_lat,
-                Center_lot = model.Center_lot,
+                Center_lot = model.Center_long,
                 Radius = appartmentInfoResult[appartmentInfoResult.Count - 1].DistanceToCenter,
                 Apartments = appartmentInfoResult
             };
@@ -71,7 +71,7 @@ namespace RecommendationSystem.Models
         public string Image_url { get; set; }
         public float Area { get; set; }
         public float Price { get; set; }
-        public bool Leasing_avaliable { get; set; }
+        public bool Leasing_available { get; set; }
         public float Distance_to_center { get; set; }
         public ApartmentProfits Profits { get; set; }
     }

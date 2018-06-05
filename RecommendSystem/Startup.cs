@@ -36,7 +36,7 @@ namespace RecommendationSystem
             services.AddMvc();
 
             services.AddSingleton<IFacebookService>(new FacebookService(new SocialNetHttpClient("https://graph.facebook.com/v2.12/")));
-            services.AddSingleton(new DestinationProvider(new HttpClient(), "uri-to-second-team"));
+            services.AddSingleton(new DestinationProvider(new HttpClient(), "http://localhost:3210/api/destination"));
             services.AddAuthentication(options =>
             {
                 options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;

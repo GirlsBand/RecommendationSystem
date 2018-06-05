@@ -84,15 +84,15 @@ namespace RecommendationSystem.Controllers
                 }
             }
 
+            if (filteredResult.Count == 0)
+                throw new HttpResponseException(HttpStatusCode.NotFound);
+
             resultForUser.Apartments = filteredResult.ToArray();
 
             return resultForUser.ToApartmentsResult();
         }
 
-
-
-
-        string RetrieveAccessToken()
+         string RetrieveAccessToken()
         {
             if (!Request.Headers.ContainsKey("ClientAccessToken"))
                 throw new HttpResponseException(HttpStatusCode.Forbidden);
@@ -169,12 +169,15 @@ namespace RecommendationSystem.Controllers
 
         public async Task<ResponseModel> GetOrAdd(string token, IntegrationModel model)
         {
+            return MockData.ResponseModel;
+
             if (_cache.TryGetValue(token, out var value))
                 return value;
 
             var content = new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json");
+
             var response = await _client.PostAsync(_uri, content);
-                response.EnsureSuccessStatusCode();
+            response.EnsureSuccessStatusCode();
             var responseContent = await response.Content.ReadAsStringAsync();
 
             var destinations = JsonConvert.DeserializeObject<ResponseModel>(responseContent);
