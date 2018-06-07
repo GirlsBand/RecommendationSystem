@@ -28,7 +28,7 @@ namespace RecommendationSystem.Controllers
 
         [Route("api/destination")]
         [HttpPost]
-        public async Task<ApartmentsResult> GetDestination([FromBody]string json)
+        public async Task<HttpResponseMessage> GetDestination([FromBody]string json)
         {
             string clientAccessToken = RetrieveAccessToken();
             var account = await _service.GetAccountAsync(clientAccessToken);
@@ -39,12 +39,12 @@ namespace RecommendationSystem.Controllers
 
             var result = await _provider.GetOrAdd(clientAccessToken, integrationModel);
 
-            return result.ToApartmentsResult();
+            return FormResponse(result);
         }
 
         [HttpGet]
         [Route("api/prices")]
-        public async Task<dynamic> GetPrices()
+        public async Task<HttpResponseMessage> GetPrices()
         {
             var resultForUser = await _provider.GetOrAdd(RetrieveAccessToken(), null);
 
@@ -61,16 +61,24 @@ namespace RecommendationSystem.Controllers
                     highestPrice = currPrice;
             }
 
-            return new
+            var result = new 
             {
                 LowestPrice = lowestPrice,
                 HighestPrice = highestPrice
             };
+
+            var response = new HttpResponseMessage
+            {
+                Content = new StringContent(JsonConvert.SerializeObject(result), Encoding.UTF8, "application/json"),
+                StatusCode = HttpStatusCode.OK
+            };
+            response.Headers.Add("Access-Control-Allow-Origin", "*");
+            return response;
         }
 
         [HttpGet]
         [Route("api/apartments")]
-        public async Task<ApartmentsResult> FilterApartments([FromBody] float highestPrice)
+        public async Task<HttpResponseMessage> FilterApartments([FromBody] float highestPrice)
         {
             var resultForUser = await _provider.GetOrAdd(RetrieveAccessToken(), null);
 
@@ -89,10 +97,21 @@ namespace RecommendationSystem.Controllers
 
             resultForUser.Apartments = filteredResult.ToArray();
 
-            return resultForUser.ToApartmentsResult();
+             return FormResponse(resultForUser);
         }
 
-         string RetrieveAccessToken()
+        private static HttpResponseMessage FormResponse(ResponseModel resultForUser)
+        {
+            var response = new HttpResponseMessage
+            {
+                Content = new StringContent(JsonConvert.SerializeObject(resultForUser.ToApartmentsResult()), Encoding.UTF8, "application/json"),
+                StatusCode = HttpStatusCode.OK
+            };
+            response.Headers.Add("Access-Control-Allow-Origin", "*");
+            return response;
+        }
+
+        string RetrieveAccessToken()
         {
             if (!Request.Headers.ContainsKey("ClientAccessToken"))
                 throw new HttpResponseException(HttpStatusCode.Forbidden);

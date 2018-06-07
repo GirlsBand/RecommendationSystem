@@ -1,6 +1,9 @@
 ﻿using System;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using System.Net.Http;
+using System.Text;
+using System.Net;
 
 namespace RecommendationSystem.Controllers
 {
@@ -15,10 +18,17 @@ namespace RecommendationSystem.Controllers
         }
         
         [HttpPost]
-        public async Task<string> Login(string clientAccessToken)
+        public async Task<HttpResponseMessage> Login(string clientAccessToken)
         {
             var account = await _service.GetAccountAsync(clientAccessToken);
-            return account.Name;
+            
+            var response = new HttpResponseMessage
+            {
+                Content = new StringContent(account.Name, Encoding.UTF8, "application/json"),
+                StatusCode = HttpStatusCode.OK
+            };
+            response.Headers.Add("Access-Control-Allow-Origin", "*");
+            return response;
         }
     }
 }
