@@ -53,7 +53,7 @@ namespace RecommendationSystem
                 facebookOptions.Scope.Add("public_profile");
                 facebookOptions.Fields.Add("name");
             })
-            .AddCookie();          
+            .AddCookie();
         }
     }
 }

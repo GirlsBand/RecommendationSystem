@@ -13,7 +13,6 @@ using System.Threading.Tasks;
 
 namespace RecommendationSystem.Controllers
 {
-    [EnableCors("AllowSpecificOrigin")]
     public class DestinationSearchController : ControllerBase
     {
         const string requestUri = "";
