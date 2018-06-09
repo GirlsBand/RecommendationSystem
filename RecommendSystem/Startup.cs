@@ -22,19 +22,22 @@ namespace RecommendationSystem
                 .AddEnvironmentVariables();
 
             Configuration = builder.Build();
+            
         }
 
         public void Configure(IApplicationBuilder app)
         {
+            app.UseCorsMiddleware();
             app.UseMvcWithDefaultRoute();
 
             app.UseAuthentication();
+
         }
 
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
-
+           
             services.AddSingleton<IFacebookService>(new FacebookService(new SocialNetHttpClient("https://graph.facebook.com/v2.12/")));
             services.AddSingleton(new DestinationProvider(new HttpClient(), "http://localhost:3210/api/destination"));
             services.AddAuthentication(options =>
@@ -43,14 +46,14 @@ namespace RecommendationSystem
                 options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             })
-            .AddFacebook(facebookOptions => {
+            .AddFacebook(facebookOptions =>
+            {
                 facebookOptions.AppId = AppId;
                 facebookOptions.AppSecret = AppSecret;
                 facebookOptions.Scope.Add("public_profile");
                 facebookOptions.Fields.Add("name");
             })
-            .AddCookie();
-
+            .AddCookie();          
         }
     }
 }
