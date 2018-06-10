@@ -38,7 +38,7 @@ namespace RecommendationSystem
         {
             services.AddMvc();
            
-            services.AddSingleton<IFacebookService>(new FacebookService(new SocialNetHttpClient("https://graph.facebook.com/v2.12/")));
+            services.AddSingleton<IFacebookService>(new FacebookService(new SocialNetHttpClient("https://graph.facebook.com/v2.12")));
             services.AddSingleton(new DestinationProvider(new HttpClient(), "http://localhost:3210/api/destination"));
             services.AddAuthentication(options =>
             {
@@ -50,8 +50,8 @@ namespace RecommendationSystem
             {
                 facebookOptions.AppId = AppId;
                 facebookOptions.AppSecret = AppSecret;
-                facebookOptions.Scope.Add("public_profile");
-                facebookOptions.Fields.Add("name");
+                facebookOptions.Scope.Add("user_tagged_places");
+                facebookOptions.Fields.Add("tagged_places");
             })
             .AddCookie();
         }

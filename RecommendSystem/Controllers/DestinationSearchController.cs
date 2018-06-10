@@ -1,11 +1,10 @@
-﻿using Microsoft.AspNetCore.Cors;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Primitives;
+﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using RecommendationSystem.Models;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -19,7 +18,7 @@ namespace RecommendationSystem.Controllers
 
         private readonly IFacebookService _service;
         private readonly DestinationProvider _provider;
-        
+
 
         public DestinationSearchController(IFacebookService service, DestinationProvider provider)
         {
@@ -29,18 +28,34 @@ namespace RecommendationSystem.Controllers
 
         [Route("api/destination")]
         [HttpPost]
-        public async Task<ApartmentsResult> GetDestination([FromBody]string json)
+        public async Task<ApartmentsResult> GetDestination(string json)
         {
             string clientAccessToken = RetrieveAccessToken();
             var account = await _service.GetAccountAsync(clientAccessToken);
 
-            var surveyResult = JsonConvert.DeserializeObject<Survey>(json);
+            Survey surveyResult = null;
+            using (var reader = new StreamReader(Request.Body))
+            {
+                var body = reader.ReadToEnd();
+
+                surveyResult = JsonConvert.DeserializeObject<Survey>(body);
+            }
+
+            if (surveyResult == null)
+                throw new HttpResponseException(HttpStatusCode.BadRequest);
 
             var integrationModel = FormIntegrationModel(account, surveyResult);
 
             var result = await _provider.GetOrAdd(clientAccessToken, integrationModel);
 
             return result.ToApartmentsResult();
+        }
+
+        [Route("api/destination")]
+        [HttpOptions]
+        public string Options()
+        {
+            return "api/destination";
         }
 
         [HttpGet]
@@ -96,12 +111,12 @@ namespace RecommendationSystem.Controllers
         string RetrieveAccessToken()
         {
             if (!Request.Headers.ContainsKey("ClientAccessToken"))
-                throw new HttpResponseException(HttpStatusCode.Forbidden);
+                throw new HttpResponseException(HttpStatusCode.Forbidden, "ClientAccessToken ");
 
-            Request.Headers.TryGetValue("ClientAccessToken", out StringValues clientAccessTokens);
+            var value = Request.Headers["ClientAccessToken"];
 
-            return clientAccessTokens[0].ToString();
-        }
+            return value[0];
+         }
 
         IntegrationModel FormIntegrationModel(Account account, Survey surveyResult)
         {
@@ -142,10 +157,7 @@ namespace RecommendationSystem.Controllers
                     question = item;
             }
 
-            if (question == null)
-                throw new ArgumentException();
-
-            return question.Answer;
+            return question == null ? string.Empty: question.Answer;
         }
 
 

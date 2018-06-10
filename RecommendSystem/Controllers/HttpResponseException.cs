@@ -9,11 +9,10 @@ namespace RecommendationSystem
     {
         private HttpStatusCode statusCode;
 
-        public HttpResponseException()
-        {
+        public HttpResponseException() {
         }
-
-        public HttpResponseException(HttpStatusCode statusCode)
+        
+        public HttpResponseException(HttpStatusCode statusCode, string message = null) : base(message)
         {
             this.statusCode = statusCode;
         }
