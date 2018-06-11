@@ -57,7 +57,21 @@ namespace RecommendationSystem.Controllers
         {
             return "api/destination";
         }
-
+        
+        [Route("api/prices")]
+        [HttpOptions]
+        public string PricesOptions()
+        {
+            return "api/prices";
+        }
+        
+        [Route("api/apartments")]
+        [HttpOptions]
+        public string ApartmentsOptions()
+        {
+            return "api/apartments";
+        }
+        
         [HttpGet]
         [Route("api/prices")]
         public async Task<dynamic> GetPrices()
