@@ -2,13 +2,13 @@
 using Newtonsoft.Json;
 using RecommendationSystem.Models;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace RecommendationSystem.Controllers
 {
@@ -194,8 +194,8 @@ namespace RecommendationSystem.Controllers
     public class DestinationProvider
     {
         private readonly HttpClient _client;
-        private readonly ConcurrentDictionary<string, ResponseModel>
-            _cache = new ConcurrentDictionary<string, ResponseModel>();
+
+        private readonly MemoryCache _cache = new MemoryCache(new MemoryCacheOptions());
 
         private readonly string _uri;
 
@@ -211,9 +211,9 @@ namespace RecommendationSystem.Controllers
         public async Task<ResponseModel> GetOrAdd(string token, IntegrationModel model)
         {
             return MockData.ResponseModel;
-
+            
             if (_cache.TryGetValue(token, out var value))
-                return value;
+                return (ResponseModel)value;
 
             var content = new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json");
 
@@ -222,7 +222,9 @@ namespace RecommendationSystem.Controllers
             var responseContent = await response.Content.ReadAsStringAsync();
 
             var destinations = JsonConvert.DeserializeObject<ResponseModel>(responseContent);
-            _cache.AddOrUpdate(token, destinations, (k, v) => destinations);
+            _cache.Set(token, destinations, new MemoryCacheEntryOptions()
+                {SlidingExpiration = TimeSpan.FromMinutes(30)});
+
             return destinations;
         }
     }
