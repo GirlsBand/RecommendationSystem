@@ -17,6 +17,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="System">
+      <HintPath>System</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="certificate.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="frontBuild\asset-manifest.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -45,6 +54,9 @@
 	      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	    </None>
 	    <None Update="frontBuild\static\media\logo.5d5d9eef.svg">
+	      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	    </None>
+	    <None Update="testCert.pfx">
 	      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	    </None>
   </ItemGroup>

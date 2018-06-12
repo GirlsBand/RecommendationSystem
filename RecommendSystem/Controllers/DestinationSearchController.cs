@@ -30,8 +30,18 @@ namespace RecommendationSystem.Controllers
         [HttpPost]
         public async Task<ApartmentsResult> GetDestination(string json)
         {
-            string clientAccessToken = RetrieveAccessToken();
-            var account = await _service.GetAccountAsync(clientAccessToken);
+            string accessToken;
+            Account account;
+            try
+            {
+                accessToken = RetrieveAccessToken();
+                account = await _service.GetAccountAsync(accessToken);
+            }
+            catch (HttpResponseException ex)
+            {
+                Request.HttpContext.Response.StatusCode = (int)ex.statusCode;
+                return null;
+            }
 
             Survey surveyResult = null;
             using (var reader = new StreamReader(Request.Body))
@@ -42,11 +52,14 @@ namespace RecommendationSystem.Controllers
             }
 
             if (surveyResult == null)
-                throw new HttpResponseException(HttpStatusCode.BadRequest);
-
+            {
+                Request.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                return null;
+            }
+            
             var integrationModel = FormIntegrationModel(account, surveyResult);
 
-            var result = await _provider.GetOrAdd(clientAccessToken, integrationModel);
+            var result = await _provider.GetOrAdd(accessToken, integrationModel);
 
             return result.ToApartmentsResult();
         }
@@ -56,6 +69,20 @@ namespace RecommendationSystem.Controllers
         public string Options()
         {
             return "api/destination";
+        }
+
+        [Route("api/prices")]
+        [HttpOptions]
+        public string PricesOptions()
+        {
+            return "api/prices";
+        }
+
+        [Route("api/apartments")]
+        [HttpOptions]
+        public string ApartmentsOptions()
+        {
+            return "api/apartments";
         }
 
         [HttpGet]
@@ -86,7 +113,7 @@ namespace RecommendationSystem.Controllers
 
         [HttpGet]
         [Route("api/apartments")]
-        public async Task<ApartmentsResult> FilterApartments([FromBody] float highestPrice)
+        public async Task<ApartmentsResult> FilterApartments([FromQuery] float highestPrice)
         {
             var resultForUser = await _provider.GetOrAdd(RetrieveAccessToken(), null);
 
@@ -101,17 +128,20 @@ namespace RecommendationSystem.Controllers
             }
 
             if (filteredResult.Count == 0)
-                throw new HttpResponseException(HttpStatusCode.NotFound);
+            {
+                Request.HttpContext.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                return null;
+            }
 
             resultForUser.Apartments = filteredResult.ToArray();
 
-             return resultForUser.ToApartmentsResult();
+            return resultForUser.ToApartmentsResult();
         }
 
         string RetrieveAccessToken()
         {
             if (!Request.Headers.ContainsKey("ClientAccessToken"))
-                throw new HttpResponseException(HttpStatusCode.Forbidden, "ClientAccessToken ");
+                throw new HttpResponseException(HttpStatusCode.Forbidden);
 
             var value = Request.Headers["ClientAccessToken"];
 
@@ -159,8 +189,6 @@ namespace RecommendationSystem.Controllers
 
             return question == null ? string.Empty: question.Answer;
         }
-
-
     }
 
     public class DestinationProvider

@@ -5,7 +5,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using RecommendationSystem.Controllers;
-
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
 namespace RecommendationSystem
 {
@@ -37,7 +38,7 @@ namespace RecommendationSystem
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
-           
+                       
             services.AddSingleton<IFacebookService>(new FacebookService(new SocialNetHttpClient("https://graph.facebook.com/v2.12")));
             services.AddSingleton(new DestinationProvider(new HttpClient(), "http://localhost:3210/api/destination"));
             services.AddAuthentication(options =>
@@ -54,6 +55,16 @@ namespace RecommendationSystem
                 facebookOptions.Fields.Add("tagged_places");
             })
             .AddCookie();
+
+            services.AddAntiforgery(
+                options =>
+                {
+                    options.Cookie.Name = "_af";
+                    options.Cookie.HttpOnly = true;
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                    options.HeaderName = "X-XSRF-TOKEN";
+                }
+            );
         }
     }
 }

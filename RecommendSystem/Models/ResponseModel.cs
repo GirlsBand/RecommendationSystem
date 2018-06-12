@@ -59,8 +59,8 @@ namespace RecommendationSystem.Models
     {
         public float Work_distance { get; set; }
         public float Work_time { get; set; }
-        public float School_distance { get; set; }
-        public float Shcool_time { get; set; }
+        public float Study_distance { get; set; }
+        public float Study_time { get; set; }
     }
 
     public class Appartment
