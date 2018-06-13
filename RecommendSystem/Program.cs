@@ -1,41 +1,51 @@
-﻿using Facebook;
-using Newtonsoft.Json;
-using System;
+﻿using System.IO;
 using System.Net;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 
 namespace RecommendationSystem
 {
-    public class AccesTokenInfo
-    {
-        public string Access_Token;
-        public string Token_Type;
-    }
-
     class Program
     {
-        const string AppId = "193302211282683";
-        const string AppSecret = "2fb8063b7eded7b8a0f63b68c108dc7f";
-
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
-            var client = new WebClient();
-
-            string oauthUrl = string.Format("https://graph.facebook.com/oauth/access_token?type=client_cred&client_id={0}&client_secret={1}", AppId, AppSecret);
-            var tempo = client.DownloadString(oauthUrl).ToString();
-            string accessToken = JsonConvert.DeserializeObject<AccesTokenInfo>(tempo).Access_Token;
-
-            var fbClient = new FacebookClient(accessToken);
-           
-            try
-            {
-                var fbData = fbClient.Get("/wikipedia/feed?fields=name").ToString();
-                Console.Write(fbData);
-            }
-            catch (FacebookOAuthException ex)
-            {
-                Console.Write(ex.Message);
-            }
-            Console.ReadLine();
+           WebHost.CreateDefaultBuilder(args)
+               .UseStartup<Startup>()
+               .UseUrls("http://*:3001")
+               .Build()
+               .Run();
         }
     }
+
+    public class CorsMiddleware
+    {
+        private readonly RequestDelegate _next;
+
+        public CorsMiddleware(RequestDelegate next)
+        {
+            _next = next;
+        }
+
+        public Task Invoke(HttpContext httpContext)
+        {
+            httpContext.Response.Headers.Add("Access-Control-Allow-Origin", "*");
+            httpContext.Response.Headers.Add("Access-Control-Allow-Credentials", "true");
+            httpContext.Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type, X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Date, X-Api-Version, X-File-Name, ClientAccessToken");
+            httpContext.Response.Headers.Add("Access-Control-Allow-Methods", "POST,GET,PUT,PATCH,DELETE,OPTIONS");
+            return _next(httpContext);
+        }
+    }
+    public static class CorsMiddlewareExtensions
+    {
+        public static IApplicationBuilder UseCorsMiddleware(this IApplicationBuilder builder)
+        {
+            return builder.UseMiddleware<CorsMiddleware>();
+        }
+    }
+
 }
