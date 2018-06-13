@@ -6,9 +6,7 @@ namespace RecommendationSystem
     public class Account
     {
         public string Id { get; set; }
-        public string Name { get; set; }
         public LocationInfo[] Tagged_Places { get; set; }
-        public LocationInfo Location { get; set; }
     }
 
     public class LocationInfo
@@ -49,19 +47,12 @@ namespace RecommendationSystem
         public async Task<Account> GetAccountAsync(string accessToken)
         {
             var result = await _facebookClient.GetAsync<dynamic>(
-                accessToken, "me", "fields=id,name,tagged_places.limit(50),location");
-
-            if (result == null)
-            {
-                return new Account();
-            }
+                accessToken, "me", "fields=tagged_places.limit(50)");
 
             var account = new Account
             {
                 Id = result.id,
-                Name = result.name,
-                Tagged_Places = result.tagged_places.data.ToObject<LocationInfo[]>(),
-                Location = result.location.ToObject<LocationInfo>()
+                Tagged_Places = result?.tagged_places?.data?.ToObject<LocationInfo[]>(),
             };
 
             return account;

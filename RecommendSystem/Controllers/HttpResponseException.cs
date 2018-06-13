@@ -7,18 +7,11 @@ namespace RecommendationSystem
     [Serializable]
     internal class HttpResponseException : Exception
     {
-        private HttpStatusCode statusCode;
+        public HttpStatusCode statusCode;
 
-        public HttpResponseException()
-        {
-        }
-
-        public HttpResponseException(HttpStatusCode statusCode)
+       public HttpResponseException(HttpStatusCode statusCode) : base()
         {
             this.statusCode = statusCode;
         }
-
-        public HttpResponseException(string message) : base(message)
-        { }
     }
 }

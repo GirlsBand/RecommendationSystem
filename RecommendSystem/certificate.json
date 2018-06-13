@@ -1,0 +1,6 @@
+﻿{
+  "certificateSettings": {
+    "fileName": "testCert.pfx",
+    "password": "password"
+  }
+}

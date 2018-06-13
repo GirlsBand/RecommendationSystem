@@ -5,74 +5,35 @@ namespace RecommendationSystem.Models
 {
     public class IntegrationModel
     {
-        public string Country = "USA";
-        public string City;
-        public Coordinates Coordinates;
-        public bool InCity;
+        public string Country { get; set; } = "USA";
+        public string City { get; set; }
+        public string Work { get; set; }
+        public string Study { get; set; }
+        public List<Coordinate> Coordinates { get; set; }
+        public bool InCity { get; set; }
+        public bool PetsToWalkPresence { get; set; }
+        public int AmountOfPeopleLiving { get; set; }
 
-        public IntegrationModel CreateIntegrationModel(Account account)
+        public void AddCheckIn(Coordinate checkIn)
         {
-            var integrationModel = new IntegrationModel
-            {
-                City = account.Location.Name
-            };
+            Coordinates.Add(checkIn);
+        }
 
-            var checkIns = new List<Coordinate>();
-
-            foreach (var location in account.Tagged_Places)
-                if (!(location.Created_time < DateTime.Today.AddYears(-1)))
-                    checkIns.Add(new Coordinate(location.Place.Location.Latitude, location.Place.Location.Longitude));
-
-            integrationModel.Coordinates = new Coordinates(checkIns);
-
-            return integrationModel;
+        public void RemoveCheckIn(Coordinate checkIn)
+        {
+            Coordinates.Remove(checkIn);
         }
     }
 
     public class Coordinate {
 
-        public float Latitude;
-        public float Longitude;
+        public float Latitude { get; set; }
+        public float Longitude { get; set; }
 
         public Coordinate(float latitude, float longitude) {
             Latitude = latitude;
             Longitude = longitude;
         }
-    }
 
-    public class Coordinates
-    {
-        public Coordinate Work = null;
-        public Coordinate Study = null;
-        public List<Coordinate> CheckIns;
-
-        public Coordinates(Coordinate work, Coordinate study, List<Coordinate> checkIns)
-        {
-            Work = work;
-            Study = study;
-            CheckIns = checkIns;
-        }
-
-        public Coordinates(List<Coordinate> checkIns)
-        {
-            CheckIns = checkIns;
-        }
-
-        public void AddCheckIn(Coordinate checkIn)
-        {
-            CheckIns.Add(checkIn);
-        }
-
-        public void RemoveCheckIn(Coordinate checkIn)
-        {
-            CheckIns.Remove(checkIn);
-        }
-
-    }
-
-    public enum PreferenceType
-    {
-        if_city,
-        if_near_subway
     }
 }
