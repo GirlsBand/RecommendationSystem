@@ -49,7 +49,7 @@ namespace RecommendationSystem.Models
             {
                 Center_lat = model.Center_lat,
                 Center_lot = model.Center_long,
-                Radius = appartmentInfoResult[appartmentInfoResult.Count - 1].DistanceToCenter,
+                Radius = appartmentInfoResult[appartmentInfoResult.Count - 1].DistanceToCenter*1000,
                 Apartments = appartmentInfoResult
             };
 

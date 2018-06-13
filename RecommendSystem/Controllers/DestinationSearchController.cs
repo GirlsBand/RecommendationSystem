@@ -47,16 +47,23 @@ namespace RecommendationSystem.Controllers
             using (var reader = new StreamReader(Request.Body))
             {
                 var body = reader.ReadToEnd();
-
-                surveyResult = JsonConvert.DeserializeObject<Survey>(body);
+                try
+                {
+                    surveyResult = JsonConvert.DeserializeObject<Survey>(body);
+                }
+                catch (Exception)
+                {
+                    Request.HttpContext.Response.StatusCode = 422;
+                }
             }
 
             if (surveyResult == null)
             {
                 Request.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+
                 return null;
             }
-            
+
             var integrationModel = FormIntegrationModel(account, surveyResult);
 
             var result = await _provider.GetOrAdd(accessToken, integrationModel);
@@ -189,6 +196,11 @@ namespace RecommendationSystem.Controllers
 
             return question == null ? string.Empty: question.Answer;
         }
+
+        static MemoryStream CreateErrorMessage(string message)
+        {
+            return new MemoryStream(Encoding.UTF8.GetBytes(message));
+        }
     }
 
     public class DestinationProvider
@@ -210,17 +222,17 @@ namespace RecommendationSystem.Controllers
 
         public async Task<ResponseModel> GetOrAdd(string token, IntegrationModel model)
         {
-            return MockData.ResponseModel;
-            
             if (_cache.TryGetValue(token, out var value))
                 return (ResponseModel)value;
 
             var content = new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json");
 
             var response = await _client.PostAsync(_uri, content);
-            response.EnsureSuccessStatusCode();
-            var responseContent = await response.Content.ReadAsStringAsync();
+            if (response.StatusCode != HttpStatusCode.OK)
+                return MockData.ResponseModel;
 
+            var responseContent = await response.Content.ReadAsStringAsync();
+                
             var destinations = JsonConvert.DeserializeObject<ResponseModel>(responseContent);
             _cache.Set(token, destinations, new MemoryCacheEntryOptions()
                 {SlidingExpiration = TimeSpan.FromMinutes(30)});

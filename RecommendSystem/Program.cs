@@ -14,36 +14,7 @@ namespace RecommendationSystem
     {
         public static void Main(string[] args)
         {
-            var config = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddEnvironmentVariables()
-                .AddJsonFile("certificate.json", optional: true, reloadOnChange: true)
-                .Build();
-
-            var certificateSettings = config.GetSection("certificateSettings");
-            string certificateFileName = certificateSettings.GetValue<string>("filename");
-            string certificatePassword = certificateSettings.GetValue<string>("password");
-
-            var certificate = new X509Certificate2(certificateFileName, certificatePassword);
-
-            //var host = new WebHostBuilder()
-            //    .UseStartup<Startup>()
-            //    .UseKestrel(options =>
-            //    {
-            //        options.Listen(IPAddress.Any, 3000);
-            //        options.Listen(IPAddress.Loopback, 3001, listenOptions =>
-            //        {
-            //            listenOptions.UseHttps("testCert.pfx", "password");
-            //       });
-            //    })
-            //    .UseConfiguration(config)
-            //    .UseContentRoot(Directory.GetCurrentDirectory())
-            //    .UseStartup<Startup>()
-            //     .Build();
-
-            //host.Run();
-
-            WebHost.CreateDefaultBuilder(args)
+           WebHost.CreateDefaultBuilder(args)
                .UseStartup<Startup>()
                .UseUrls("http://*:3001")
                .Build()
